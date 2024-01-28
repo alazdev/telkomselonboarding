@@ -14,7 +14,7 @@ class DashboardTrackingController extends Controller
     {
     
         return view('dashboard.tracking.index',[
-            'tracking' => Tracking::all()
+            'tracking' => Tracking::orderBy('created_at', 'DESC')->get()
         ]);
     
     }

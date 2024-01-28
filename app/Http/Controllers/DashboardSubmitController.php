@@ -30,59 +30,56 @@ class DashboardSubmitController extends Controller
      */
     public function store(Request $request)
     {
-   // Validasi data yang diterima dari form
-   dd($request->all());
-   $validatedData = $request->validate([
-    'judul' => 'required|max:255',
-    'tglsubmit' => 'required|max:255',
-    'function' => 'required|max:255',
-    'vcpu' => 'required|max:255',
-    'ram' => 'required|max:255',
-    'disk' => 'required|max:255',
-    'targetonboarding' => 'required|max:255',
-    'keterangan' => 'required|max:255',
-    'notadinas' => 'required|mimes:xlsx,xls|max:2048', // Menambahkan validasi untuk tipe file dan ukuran
-    'bisnisreview' => 'required|mimes:xlsx,xls|max:2048', // Menambahkan validasi untuk tipe file dan ukuran
-    'dataresource' => 'required|mimes:xlsx,xls|max:2048', // Menambahkan validasi untuk tipe file dan ukuran
-]);
+        // Validasi data yang diterima dari form
+        $validatedData = $request->validate([
+            'judul' => 'required|max:255',
+            // 'tglsubmit' => 'required|max:255',
+            'function' => 'required|max:255',
+            'vcpu' => 'required|max:255',
+            'ram' => 'required|max:255',
+            'disk' => 'required|max:255',
+            'targetonboarding' => 'required|max:255',
+            'keterangan' => 'required|max:255',
+            'notadinas' => 'required|mimes:xlsx,xls|max:2048', // Menambahkan validasi untuk tipe file dan ukuran
+            'bisnisreview' => 'required|mimes:xlsx,xls|max:2048', // Menambahkan validasi untuk tipe file dan ukuran
+            'dataresource' => 'required|mimes:xlsx,xls|max:2048', // Menambahkan validasi untuk tipe file dan ukuran
+        ]);
 
-// Simpan file notadinas dengan nama asli
-$pathNotadinas = $request->file('notadinas')->getClientOriginalName();
-$request->file('notadinas')->storeAs('excelnotadinas', $pathNotadinas);
+        // Buat ID tracking berdasarkan tanggal dan waktu saat ini
+        $idtracking = 'TSEL' . Carbon::now()->format('dmHi');
 
-// Simpan file bisnisreview dengan nama asli
-$pathBisnisreview = $request->file('bisnisreview')->getClientOriginalName();
-$request->file('bisnisreview')->storeAs('excelbisnisreview', $pathBisnisreview);
+        // Simpan file notadinas dengan nama asli
+        $pathNotadinas = $idtracking."-".$request->file('notadinas')->getClientOriginalName();
+        $request->file('notadinas')->storeAs('public/excelnotadinas', $pathNotadinas);
 
-// Simpan file dataresource dengan nama asli
-$pathDataresource = $request->file('dataresource')->getClientOriginalName();
-$request->file('dataresource')->storeAs('dataresource', $pathDataresource);
+        // Simpan file bisnisreview dengan nama asli
+        $pathBisnisreview = $idtracking."-".$request->file('bisnisreview')->getClientOriginalName();
+        $request->file('bisnisreview')->storeAs('public/excelbisnisreview', $pathBisnisreview);
 
-// Buat ID tracking berdasarkan tanggal dan waktu saat ini
-$idtracking = 'TSEL' . Carbon::now()->format('dmHi');
+        // Simpan file dataresource dengan nama asli
+        $pathDataresource = $idtracking."-".$request->file('dataresource')->getClientOriginalName();
+        $request->file('dataresource')->storeAs('public/dataresource', $pathDataresource);
 
-// Simpan data ke database
-$tracking = new Submit();
-$tracking->tracking_id = $idtracking;
-$tracking->judul_aplikasi = $validatedData['judul'];
-$tracking->tgl_submit = $validatedData['tglsubmit'];
-$tracking->function = $validatedData['function'];
-$tracking->vcpu = $validatedData['vcpu'];
-$tracking->ram = $validatedData['ram'];
-$tracking->disk = $validatedData['disk'];
-$tracking->target_onboarding = $validatedData['targetonboarding'];
-$tracking->status = $validatedData['status'];
-$tracking->keterangan = $validatedData['keterangan'];
-// Simpan nama file ke dalam kolom-kolom yang sesuai di database
-$tracking->nama_notadinas = $pathNotadinas;
-$tracking->nama_bisnisreview = $pathBisnisreview;
-$tracking->nama_dataresource = $pathDataresource;
-$tracking->save();
-{
-    Submit::create($request->except(['_token','submit']));
-    return redirect('/dashborad/tracking');
-}
-// Redirect atau kirim pesan sukses, dll.
+        // Simpan data ke database
+        $tracking = new Submit();
+        $tracking->idtracking = $idtracking;
+        $tracking->judul = $validatedData['judul'];
+        $tracking->tglsubmit = Carbon::now()->format('d/m/y');
+        $tracking->function = $validatedData['function'];
+        $tracking->vcpu = $validatedData['vcpu'];
+        $tracking->ram = $validatedData['ram'];
+        $tracking->disk = $validatedData['disk'];
+        $tracking->targetonboarding = $validatedData['targetonboarding'];
+        $tracking->status = "proses";
+        $tracking->keterangan = $validatedData['keterangan'];
+        // Simpan nama file ke dalam kolom-kolom yang sesuai di database
+        $tracking->notadinas = 'storage/excelnotadinas/'.$pathNotadinas;
+        $tracking->bisnisreview = 'storage/excelbisnisreview/'.$pathBisnisreview;
+        $tracking->dataresource = 'storage/dataresource/'.$pathDataresource;
+        $tracking->save();
+        
+        return redirect('/dashboard/tracking');
+        // Redirect atau kirim pesan sukses, dll.
     }
 
     /**

@@ -20,13 +20,25 @@
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>1,001</td>
-              <td>random</td>
-              <td>data</td>
-              <td>placeholder</td>
-              <td>text</td>
-            </tr>
+            @foreach ($tracking as $data)
+              <tr>
+                <td>{{ $data->idtracking }}</td>
+                <td>{{ $data->judul }}</td>
+                <td>{{ $data->tglsubmit }}</td>
+                <td>
+                  <a href="{{ url('/').'/'.$data->notadinas }}" download>Unduh Nota Dinas</a>
+                </td>
+                <td>
+                  <a href="{{ url('/').'/'.$data->bisnisreview }}" download>Unduh Bisnis Review</a>
+                </td>
+                <td>
+                  <a href="{{ url('/').'/'.$data->dataresource }}" download>Unduh Data Resource</a>
+                </td>
+                <td>{{ $data->status }}</td>
+                <td>{{ $data->keterangan }}</td>
+                <td></td>
+              </tr>
+            @endforeach
           </tbody>
         </table>
       </div>
